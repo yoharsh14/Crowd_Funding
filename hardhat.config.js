@@ -1,5 +1,5 @@
 require("@nomiclabs/hardhat-ethers");
-require("dotenv").config;
+require("dotenv").config();
 require("hardhat-deploy");
 require("@nomiclabs/hardhat-etherscan");
 
@@ -9,16 +9,23 @@ const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 module.exports = {
   solidity: "0.8.18",
   defaultNetwork: "hardhat",
-  // networks: {
-  //   sepolia: {
-  //     url: RPC_URL,
-  //     chainId: 1115111,
-  //     accounts: [PRIVATE_KEY],
-  //   },
-  // },
-  // etherscan: {
-  //   apiKey: {
-  //     sepolia: ETHERSCAN_API_KEY,
-  //   },
-  // },
+  networks: {
+    sepolia: {
+      url: RPC_URL,
+      accounts: [PRIVATE_KEY],
+      chainId: 11155111,
+      blockConfirmations: 6,
+      timeout: 100000,
+    },
+  },
+  etherscan: {
+    apiKey: {
+      sepolia: ETHERSCAN_API_KEY,
+    },
+  },
+  namedAccounts: {
+    deployer: {
+      default: 0,
+    },
+  },
 };

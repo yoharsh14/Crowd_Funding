@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/crowdFunding.sol": {
+      "content": "// SPDX-License-Identifier: MIT\n\npragma solidity ^0.8.18;\n\ncontract crowdFunding {\n    event projectFunded(\n        string indexed project_Name,\n        address indexed funder,\n        uint256 amountFunded\n    );\n    // 1. Projects\n    // 2. Fund particular project\n    // 3. Just fund\n    struct Projects {\n        address lead;\n        string name;\n        string about;\n        uint256 projectId;\n        uint256 raisedMoney;\n    }\n    struct Funders {\n        string name;\n        uint256 amount;\n    }\n    mapping(uint256 => Projects) idToProject;\n    mapping(address => Funders) fundersDetail;\n    address private immutable _owner;\n    mapping(uint256 => string) private projectIdsWithName;\n    uint256 currProjectId;\n\n    constructor() {\n        _owner = msg.sender;\n        currProjectId = 0;\n    }\n\n    function getProjectsDetails(uint256 projectId) public view  returns (Projects memory) {\n        return idToProject[projectId];\n    }\n\n    function fundProject(uint256 projectId) public payable {\n        address payable projectLead = payable(idToProject[projectId].lead);\n        (bool sent,) = projectLead.call{value: msg.value}(\"\");\n        idToProject[projectId].raisedMoney = uint256(msg.value);\n        require(sent, \"Failed to send Ether\");\n        emit projectFunded(idToProject[projectId].name, msg.sender, msg.value);\n    }\n\n    function fundPool() public payable {}\n\n    function addProject(\n        string memory name,\n        string memory about,\n        uint256 raisedMoney,\n        address _lead\n    ) public {\n        require(\n            msg.sender == _owner,\n            \"You are not the owner you cannot add your team\"\n        );\n        Projects memory project = Projects(\n            _lead,\n            name,\n            about,\n            currProjectId,\n            raisedMoney\n        );\n        idToProject[currProjectId] = project;\n        projectIdsWithName[currProjectId] = name;\n        currProjectId++;\n    }\n\n    function PoolFundProject(uint256 projectId, uint256 amount) public payable {\n        require(\n            msg.sender == _owner,\n            \"You are not the owner you cannot fund the team from pool funds\"\n        );\n        address payable projectLead = payable(idToProject[projectId].lead);\n        projectLead.transfer(amount);\n        idToProject[projectId].raisedMoney = uint256(amount);\n        emit projectFunded(idToProject[projectId].name, _owner, amount);\n    }\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
